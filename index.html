@@ -44,7 +44,7 @@ function save(){try{localStorage.setItem(key,JSON.stringify(progress))}catch(e){
 function pendingKey(hard){return hard?'pendingChallenge':'pendingPractice'}
 function beginQuiz(hard,forceNew=false){
  challenge=hard;const bank=questionBank(hard),keyName=pendingKey(hard);
- if(forceNew||!Array.isArray(progress[keyName])||progress[keyName].length===0){progress[keyName]=bank.map((_,i)=>i);save()}
+ if(!Array.isArray(progress[keyName])){progress[keyName]=bank.map((_,i)=>i);save()}
  quizList=progress[keyName].map(i=>bank[i]).filter(Boolean);
  practiceMistakes=[];practiceRound=1;quizIndex=0;quizScore=0;quizAnswered=false;
  show(hard?'desafios':'practicar');if(hard)el('challengeQuiz').classList.remove('hidden');
@@ -57,7 +57,7 @@ function renderQuiz(){
   if(pending.length){el(target).innerHTML=`<div class="feedback incorrect"><h2>🔁 Quedan preguntas pendientes</h2><p>Respondiste ${quizScore} de ${quizList.length} correctamente en esta ronda.</p><p>Te quedan <strong>${pending.length}</strong> preguntas para corregir. Tu progreso está guardado, incluso si sales de la página.</p></div><button class="primary" onclick="beginQuiz(${challenge})">Repetir solo las pendientes →</button><div class="actions"><button onclick="show('unidad')">Volver a Geometría</button></div>`;return}
   let earned=quizScore*(challenge?20:10),extra=0,newMedals=[];
   if(challenge){progress.bestChallenge=Math.max(progress.bestChallenge,challengeQuestions.length);for(const [name,bonus] of [['🥉 Explorador geométrico',30],['🥈 Maestro de figuras',60],['🥇 Genio de Geometría',120]]){if(!progress.medals.includes(name)){progress.medals.push(name);newMedals.push(name);extra+=bonus}}progress.xp+=extra;save();renderBadges()}
-  el(target).innerHTML=`<div class="feedback correct"><h2>${challenge?'🏆 ¡Desafío completado!':'🎉 ¡Práctica completada!'}</h2><p>¡Todas las preguntas están respondidas correctamente!</p><p>${extra?'Has ganado '+extra+' XP adicionales por nuevas medallas.':'Puedes comenzar una nueva ronda cuando quieras.'}</p>${newMedals.length?'<p>'+newMedals.join(' · ')+'</p>':''}</div><div class="actions"><button class="primary" onclick="beginQuiz(${challenge},true)">Comenzar una ronda nueva</button><button onclick="show('unidad')">Volver a Geometría</button></div>`;return;
+  el(target).innerHTML=`<div class="feedback correct"><h2>${challenge?'🏆 ¡Desafío completado!':'🎉 ¡Práctica completada!'}</h2><p>¡Todas las preguntas están respondidas correctamente!</p><p>${extra?'Has ganado '+extra+' XP adicionales por nuevas medallas.':'Tu actividad ha quedado completada y guardada.'}</p>${newMedals.length?'<p>'+newMedals.join(' · ')+'</p>':''}</div><div class="actions"><button onclick="show('unidad')">Volver a Geometría</button></div>`;return;
  }
  el(target).innerHTML=`<div class="flex"><span class="tag">${challenge?'🚀 Desafío avanzado · +20 XP':'✏️ Práctica guiada · +10 XP'} por acierto</span><strong>${quizIndex+1}/${quizList.length}</strong></div><div class="progress" style="margin:14px 0"><div style="width:${quizIndex/quizList.length*100}%"></div></div><p class="muted small">${pending.length} pregunta(s) pendiente(s). Se guardan automáticamente.</p><h2>${q[0]}</h2>${q[1].map((a,i)=>`<button class="option" onclick="answer(${i})">${String.fromCharCode(65+i)}. ${a}</button>`).join('')}<div id="response"></div>`;
 }
